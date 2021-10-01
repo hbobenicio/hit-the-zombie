@@ -6,6 +6,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "game/game.h"
 
@@ -22,8 +23,13 @@ int main() {
     }
 
     if (IMG_Init(IMG_INIT_PNG) == 0) {
-        fprintf(stderr, "error: sdl2: failed to init sdl_image: %s\n", IMG_GetError());
+        fprintf(stderr, "error: sdl2: failed to init SDL2_image: %s\n", IMG_GetError());
         goto err_sdl_quit;
+    }
+
+    if (TTF_Init() != 0) {
+        fprintf(stderr, "error: sdl2: failed to init SDL2_ttf: %s\n", TTF_GetError());
+        goto err_img_quit;
     }
 
     SDL_Window* window = SDL_CreateWindow(
@@ -35,7 +41,7 @@ int main() {
     );
     if (window == NULL) {
         fprintf(stderr, "error: sdl2: failed to create window: %s\n", SDL_GetError());
-        goto err_img_quit;
+        goto err_ttf_quit;
     }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -94,6 +100,7 @@ exit_main_loop:
     game_free(&game);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
     return 0;
@@ -106,7 +113,10 @@ err_sdl_destroy_renderer:
 
 err_sdl_destroy_window:
     SDL_DestroyWindow(window);
-    
+
+err_ttf_quit:
+    TTF_Quit();
+
 err_img_quit:
     IMG_Quit();
 

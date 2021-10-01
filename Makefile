@@ -5,8 +5,8 @@ OBJ = $(SRC:.c=.o)
 DEP = $(OBJ:.o=.d)
 BIN = snake
 
-PKG_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_image)
-PKG_LDLIBS := $(shell pkg-config --libs sdl2 SDL2_image)
+PKG_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_image SDL2_ttf)
+PKG_LDLIBS := $(shell pkg-config --libs sdl2 SDL2_image SDL2_ttf)
 
 # MMD will generate a .d file for each .c module containing its Makefile rules (including dependencies)
 # These .d files are used with the `-include` bellow

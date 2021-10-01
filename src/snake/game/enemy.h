@@ -23,13 +23,6 @@ enum enemy_state {
     ENEMY_STATE_DEAD,
 };
 
-struct enemy_sprites {
-    SDL_Surface* attack[SNAKE_ENEMY_ATTACK_SPRITE_LEN];
-    SDL_Surface* dead[SNAKE_ENEMY_DEAD_SPRITE_LEN];
-    SDL_Surface* idle[SNAKE_ENEMY_IDLE_SPRITE_LEN];
-    SDL_Surface* walk[SNAKE_ENEMY_WALK_SPRITE_LEN];
-};
-
 struct enemy {
     SDL_Rect box;
 

@@ -25,6 +25,13 @@
 #define IDLE_SPRITE_ANIMATION_DURATION_MS   32
 #define WALK_SPRITE_ANIMATION_DURATION_MS   32
 
+struct enemy_sprites {
+    SDL_Surface* attack[SNAKE_ENEMY_ATTACK_SPRITE_LEN];
+    SDL_Surface* dead[SNAKE_ENEMY_DEAD_SPRITE_LEN];
+    SDL_Surface* idle[SNAKE_ENEMY_IDLE_SPRITE_LEN];
+    SDL_Surface* walk[SNAKE_ENEMY_WALK_SPRITE_LEN];
+};
+
 static struct enemy_sprites enemy_male_sprites   = {0};
 static struct enemy_sprites enemy_female_sprites = {0};
 
@@ -222,7 +229,7 @@ int enemy_render(struct enemy* enemy, SDL_Renderer* renderer)
 {
     struct enemy_sprites* sprites = enemy_sprites(enemy);
 
-    SDL_Texture* texture;
+    SDL_Texture* texture = NULL;
     switch (enemy->state) {
     case ENEMY_STATE_ATTACK:
         texture = SDL_CreateTextureFromSurface(renderer, sprites->attack[enemy->animation_sprite_index]);
