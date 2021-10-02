@@ -14,8 +14,6 @@
 #define SCREEN_HEIGHT 800
 #define FRAME_RATE 60 //fps
 
-int background_render(SDL_Renderer* renderer);
-
 int main() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "error: sdl2: init failed: %s\n", SDL_GetError());
@@ -80,12 +78,11 @@ int main() {
         
         game_update(&game);
 
-        assert(background_render(renderer) == 0);
-
         if (game_render(&game, renderer) != 0) {
-            fprintf(stderr, "error: game rendering failed\n");
+            fprintf(stderr, "error: game: rendering failed\n");
             goto err_game_free;
         }
+
         SDL_RenderPresent(renderer);
 
         uint32_t frame_end_ms = SDL_GetTicks();
@@ -123,11 +120,4 @@ err_img_quit:
 err_sdl_quit:
     SDL_Quit();
     return 1;
-}
-
-int background_render(SDL_Renderer* renderer)
-{
-    assert(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255) == 0);
-    assert(SDL_RenderClear(renderer) == 0);
-    return 0;
 }

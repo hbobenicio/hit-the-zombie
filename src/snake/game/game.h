@@ -1,12 +1,14 @@
 #ifndef SNAKE_GAME_H
 #define SNAKE_GAME_H
 
-#include "enemy.h"
-
 #include <SDL2/SDL_render.h>
+
+#include "enemy.h"
+#include "score.h"
 
 struct game {
     struct enemy enemy;
+    struct score score;
 };
 
 int game_init(struct game* game);

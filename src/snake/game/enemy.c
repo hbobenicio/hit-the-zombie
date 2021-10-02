@@ -280,17 +280,22 @@ void enemy_set_state(struct enemy* enemy, enum enemy_state new_state)
 }
 
 // NOTE current limitation: animations are linear. maybe could be improved in some no linear fashion (function parametrization)
-void enemy_update(struct enemy* enemy)
+void enemy_update(struct enemy* enemy, bool* out_hit)
 {
-    // dead enemies don't have animations. nothing to update.
-    if (enemy->state == ENEMY_STATE_DEAD)
+    // dead enemy => noop
+    if (enemy->state == ENEMY_STATE_DEAD) {
         return;
+    }
 
-    int mouse_x, mouse_y;
-    uint32_t mouse_btn_state = SDL_GetMouseState(&mouse_x, &mouse_y);
-    if (mouse_btn_state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-        if (collision_rect_point(&enemy->box, mouse_x, mouse_y)) {
-            enemy_set_state(enemy, ENEMY_STATE_DYING);
+    // Hit collision check (only for alive enemies)
+    if (enemy_is_alive(enemy)) {
+        int mouse_x, mouse_y;
+        uint32_t mouse_btn_state = SDL_GetMouseState(&mouse_x, &mouse_y);
+        if (mouse_btn_state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+            if (collision_rect_point(&enemy->box, mouse_x, mouse_y)) {
+                enemy_set_state(enemy, ENEMY_STATE_DYING);
+                *out_hit = true;
+            }
         }
     }
 
@@ -303,4 +308,9 @@ void enemy_update(struct enemy* enemy)
             enemy->state = ENEMY_STATE_DEAD;
         }
     }
+}
+
+bool enemy_is_alive(const struct enemy* enemy)
+{
+    return enemy->state != ENEMY_STATE_DYING && enemy->state != ENEMY_STATE_DEAD;
 }

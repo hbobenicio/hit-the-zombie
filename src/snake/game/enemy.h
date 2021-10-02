@@ -1,7 +1,7 @@
-#ifndef SNAKE_ENEMY_H
-#define SNAKE_ENEMY_H
+#ifndef SNAKE_GAME_ENEMY_H
+#define SNAKE_GAME_ENEMY_H
 
-// TODO any better headers to use the opaque SDL_Texture type without "including" the world?
+#include <stdbool.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 
@@ -39,6 +39,7 @@ void enemy_free_sprites(void);
 int enemy_init(struct enemy* enemy, enum enemy_gender gender);
 int enemy_render(struct enemy* enemy, SDL_Renderer* renderer);
 void enemy_set_state(struct enemy* enemy, enum enemy_state new_state);
-void enemy_update(struct enemy* enemy);
+void enemy_update(struct enemy* enemy, bool* out_hit);
+bool enemy_is_alive(const struct enemy* enemy);
 
 #endif
