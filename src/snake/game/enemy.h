@@ -23,11 +23,18 @@ enum enemy_state {
     ENEMY_STATE_DEAD,
 };
 
+enum enemy_direction {
+    ENEMY_DIRECTION_LEFT,
+    ENEMY_DIRECTION_RIGHT,
+};
+
 struct enemy {
     SDL_Rect box;
 
     enum enemy_gender gender;
     enum enemy_state state;
+    enum enemy_direction direction;
+    int velocity;
 
     uint32_t animation_tick;
     uint32_t animation_sprite_index;

@@ -28,8 +28,8 @@ void score_init(struct score* score)
     score->box = (SDL_Rect) {
         .x = 10,
         .y = 10,
-        .w = 350,
-        .h = 85,
+        .w = 300,
+        .h = 65,
     };
     score->color = (SDL_Color) {
         .r = 255,

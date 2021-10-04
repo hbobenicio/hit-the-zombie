@@ -9,9 +9,8 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "game/game.h"
+#include "game/screen.h"
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 800
 #define FRAME_RATE 60 //fps
 
 int main() {

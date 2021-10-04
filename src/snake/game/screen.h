@@ -1,0 +1,7 @@
+#ifndef SNAKE_GAME_SCREEN_H
+#define SNAKE_GAME_SCREEN_H
+
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 800
+
+#endif

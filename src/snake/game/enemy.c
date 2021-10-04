@@ -8,6 +8,7 @@
 
 #include <SDL2/SDL_image.h>
 
+#include "screen.h"
 #include "collision.h"
 
 #define MALE_ATTACK_SPRITE_FMT   "./assets/zombiefiles/png/male/Attack (%d).png"
@@ -20,10 +21,11 @@
 #define FEMALE_IDLE_SPRITE_FMT   "./assets/zombiefiles/png/female/Idle (%d).png"
 #define FEMALE_WALK_SPRITE_FMT   "./assets/zombiefiles/png/female/Walk (%d).png"
 
+// TODO animation speed could raise according to the current score/difficulty (or the velocity itself could raise instead...)
 #define ATTACK_SPRITE_ANIMATION_DURATION_MS 32
 #define DEAD_SPRITE_ANIMATION_DURATION_MS   64
 #define IDLE_SPRITE_ANIMATION_DURATION_MS   32
-#define WALK_SPRITE_ANIMATION_DURATION_MS   32
+#define WALK_SPRITE_ANIMATION_DURATION_MS   44
 
 struct enemy_sprites {
     SDL_Surface* attack[SNAKE_ENEMY_ATTACK_SPRITE_LEN];
@@ -34,6 +36,12 @@ struct enemy_sprites {
 
 static struct enemy_sprites enemy_male_sprites   = {0};
 static struct enemy_sprites enemy_female_sprites = {0};
+
+static bool enemy_collide_screen(const struct enemy* enemy) {
+    bool right_collision = enemy->box.x + enemy->box.w >= SCREEN_WIDTH;
+    bool left_collision = enemy->box.x <= 0;
+    return right_collision || left_collision;
+}
 
 static const char* strgender(enum enemy_gender gender) {
     switch (gender) {
@@ -211,15 +219,21 @@ void enemy_free_sprites(void)
 
 int enemy_init(struct enemy* enemy, enum enemy_gender gender)
 {
+    // TODO check if every animation sprite have these sizes
+    static const int sprite_width = 521, sprite_height = 576;
+
     // TODO game could randomize it and pass it down to this init function
     enemy->box = (SDL_Rect) {
-        .x = 10,
-        .y = 10,
-        .w = 521,
-        .h = 576,
+        .x = 25,
+        .y = 150,
+        .w = sprite_width / 2,
+        .h = sprite_height / 2,
     };
     enemy->gender = gender;
-    enemy->state = ENEMY_STATE_IDLE;
+    // enemy->state = ENEMY_STATE_IDLE;
+    enemy->state = ENEMY_STATE_WALK;
+    enemy->direction = ENEMY_DIRECTION_RIGHT;
+    enemy->velocity = 10;
     enemy->animation_tick = SDL_GetTicks();
     enemy->animation_sprite_index = 0;
     return 0;
@@ -259,10 +273,24 @@ int enemy_render(struct enemy* enemy, SDL_Renderer* renderer)
         return 1;
     }
 
-    if (SDL_RenderCopy(renderer, texture, NULL, &enemy->box) != 0) {
-        fprintf(stderr, "error: sdl2: sdl_image: failed create texture from surface: %s\n", SDL_GetError());
-        goto err_destroy_texture;
+    // flip sprite if facing left
+    if (enemy->direction == ENEMY_DIRECTION_LEFT) {
+        if (SDL_RenderCopyEx(renderer, texture, NULL, &enemy->box, 0.0, NULL, SDL_FLIP_HORIZONTAL) != 0) {
+            fprintf(stderr, "error: sdl2: sdl_image: failed create texture from surface: %s\n", SDL_GetError());
+            goto err_destroy_texture;
+        }
+    } else {
+        if (SDL_RenderCopy(renderer, texture, NULL, &enemy->box) != 0) {
+            fprintf(stderr, "error: sdl2: sdl_image: failed create texture from surface: %s\n", SDL_GetError());
+            goto err_destroy_texture;
+        }
     }
+
+
+    #ifdef DEBUG_BOUNDING_BOX
+    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
+    SDL_RenderDrawRect(renderer, &enemy->box);
+    #endif
 
     SDL_DestroyTexture(texture);
     return 0;
@@ -303,6 +331,16 @@ void enemy_update(struct enemy* enemy, bool* out_hit)
     if (should_animate) {
         enemy->animation_sprite_index = (enemy->animation_sprite_index + 1) % enemy_sprite_animation_len(enemy);
         enemy->animation_tick = SDL_GetTicks();
+
+        enemy->box.x += enemy->velocity;
+        if (enemy_collide_screen(enemy)) {
+            enemy->box.x -= enemy->velocity;
+            if (enemy->direction == ENEMY_DIRECTION_RIGHT)
+                enemy->direction = ENEMY_DIRECTION_LEFT;
+            else
+                enemy->direction = ENEMY_DIRECTION_RIGHT;
+            enemy->velocity = -enemy->velocity;
+        }
 
         if (enemy->state == ENEMY_STATE_DYING && enemy->animation_sprite_index == 0) {
             enemy->state = ENEMY_STATE_DEAD;
