@@ -17,6 +17,8 @@
 #define FRAME_RATE 60 //fps
 
 int main() {
+    srand(time(NULL));
+    
     // Maybe all of these initialization calls could be encapsulated in the game init function...
     // or at least in another function.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {

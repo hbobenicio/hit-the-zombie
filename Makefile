@@ -1,4 +1,5 @@
 SRC = \
+	$(wildcard src/hit-the-zoombie/util/*.c) \
 	$(wildcard src/hit-the-zoombie/game/*.c) \
 	$(wildcard src/hit-the-zoombie/*.c)
 OBJ = $(SRC:.c=.o)

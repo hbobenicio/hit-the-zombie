@@ -8,6 +8,7 @@
 
 #include <SDL2/SDL_image.h>
 
+#include <hit-the-zoombie/util/random.h>
 #include "screen.h"
 #include "collision.h"
 
@@ -222,10 +223,11 @@ int enemy_init(struct enemy* enemy, enum enemy_gender gender)
     // TODO check if every animation sprite have these sizes
     static const int sprite_width = 521, sprite_height = 576;
 
-    // TODO game could randomize it and pass it down to this init function
+    int x = random_range_int(0, SCREEN_WIDTH - sprite_width - 5);
+    int y = random_range_int(150, SCREEN_HEIGHT - sprite_height - 5);
     enemy->box = (SDL_Rect) {
-        .x = 25,
-        .y = 150,
+        .x = x,
+        .y = y,
         .w = sprite_width / 2,
         .h = sprite_height / 2,
     };
