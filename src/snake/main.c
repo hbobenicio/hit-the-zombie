@@ -4,9 +4,12 @@
 #include <time.h>
 #include <errno.h>
 
+#include <unistd.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "game/game.h"
 #include "game/screen.h"
@@ -14,7 +17,9 @@
 #define FRAME_RATE 60 //fps
 
 int main() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    // Maybe all of these initialization calls could be encapsulated in the game init function...
+    // or at least in another function.
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "error: sdl2: init failed: %s\n", SDL_GetError());
         return 1;
     }
@@ -29,16 +34,27 @@ int main() {
         goto err_img_quit;
     }
 
+    {
+        int page_size = (int) sysconf(_SC_PAGESIZE);
+        int chunk_size = (page_size == -1) ? 4098 : page_size;
+        if (Mix_OpenAudio(44100, AUDIO_S16SYS, 2, chunk_size) != 0) {
+            fprintf(stderr, "error: sdl2: failed to init SDL2_mixer: %s\n", Mix_GetError());
+            goto err_ttf_quit;
+        }
+    }
+
     SDL_Window* window = SDL_CreateWindow(
         "Zoombie - Point'n'Click",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
-        SDL_WINDOW_SHOWN
+        // SDL_WINDOW_SHOWN
+        SDL_WINDOW_FULLSCREEN
     );
     if (window == NULL) {
         fprintf(stderr, "error: sdl2: failed to create window: %s\n", SDL_GetError());
-        goto err_ttf_quit;
+        // goto err_mix_quit;
+        goto err_mix_close_audio;
     }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -54,6 +70,7 @@ int main() {
     }
 
     const uint32_t expected_frame_duration_ms = 1000 / FRAME_RATE;
+    double fps = -1.0;
     while (true) {
         uint32_t frame_start_ms = SDL_GetTicks();
         // Poll events and Update State
@@ -82,6 +99,29 @@ int main() {
             goto err_game_free;
         }
 
+        if (fps >= 0.0) {
+            // TODO move this to a custom entity and encapsulate the rendering inside game
+            char fps_txt[16];
+            const int fps_txt_size = sizeof(fps_txt) / sizeof(fps_txt[0]);
+
+            int nprinted = snprintf(fps_txt, fps_txt_size, "Score: %.1lf", fps);
+            assert(nprinted > 0 && nprinted < fps_txt_size);
+
+            SDL_Surface* fps_surface = TTF_RenderText_Solid(game.score.font, fps_txt, game.score.color);
+            assert(fps_surface != NULL);
+
+            SDL_Texture* fps_texture = SDL_CreateTextureFromSurface(renderer, fps_surface);
+            assert(fps_texture != NULL);
+
+            SDL_FreeSurface(fps_surface);
+            fps_surface = NULL;
+
+            SDL_Rect fps_txt_box = { .x = game.score.box.x, .y = SCREEN_HEIGHT - 100, .w = 150, .h = 100 + 10 };
+            assert(SDL_RenderCopy(renderer, fps_texture, NULL, &fps_txt_box) == 0);
+
+            SDL_DestroyTexture(fps_texture);
+        }
+
         SDL_RenderPresent(renderer);
 
         uint32_t frame_end_ms = SDL_GetTicks();
@@ -89,6 +129,9 @@ int main() {
         if (actual_frame_duration_ms < expected_frame_duration_ms) {
             uint32_t delay = expected_frame_duration_ms - actual_frame_duration_ms;
             SDL_Delay(delay);
+
+            uint32_t frame_render_duration = SDL_GetTicks() - frame_start_ms;
+            fps = 1.0 / (frame_render_duration / 1000.0);
         }
     }
 
@@ -96,6 +139,8 @@ exit_main_loop:
     game_free(&game);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    // Mix_Quit();
+    Mix_CloseAudio();
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
@@ -109,6 +154,11 @@ err_sdl_destroy_renderer:
 
 err_sdl_destroy_window:
     SDL_DestroyWindow(window);
+
+// err_mix_quit:
+//     Mix_Quit();
+err_mix_close_audio:
+    Mix_CloseAudio();
 
 err_ttf_quit:
     TTF_Quit();
