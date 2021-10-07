@@ -1,14 +1,14 @@
-#ifndef SNAKE_GAME_ENEMY_H
-#define SNAKE_GAME_ENEMY_H
+#ifndef HTZ_GAME_ENEMY_H
+#define HTZ_GAME_ENEMY_H
 
 #include <stdbool.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 
-#define SNAKE_ENEMY_ATTACK_SPRITE_LEN 8
-#define SNAKE_ENEMY_DEAD_SPRITE_LEN 9
-#define SNAKE_ENEMY_IDLE_SPRITE_LEN 15
-#define SNAKE_ENEMY_WALK_SPRITE_LEN 10
+#define HTZ_ENEMY_ATTACK_SPRITE_LEN 8
+#define HTZ_ENEMY_DEAD_SPRITE_LEN 9
+#define HTZ_ENEMY_IDLE_SPRITE_LEN 15
+#define HTZ_ENEMY_WALK_SPRITE_LEN 10
 
 enum enemy_gender {
     ENEMY_GENDER_MALE,

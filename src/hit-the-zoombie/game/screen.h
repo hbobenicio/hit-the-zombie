@@ -1,5 +1,5 @@
-#ifndef SNAKE_GAME_SCREEN_H
-#define SNAKE_GAME_SCREEN_H
+#ifndef HTZ_GAME_SCREEN_H
+#define HTZ_GAME_SCREEN_H
 
 // 16:9
 #define SCREEN_WIDTH 1920

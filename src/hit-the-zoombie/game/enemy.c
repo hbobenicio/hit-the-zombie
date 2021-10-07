@@ -28,10 +28,10 @@
 #define WALK_SPRITE_ANIMATION_DURATION_MS   44
 
 struct enemy_sprites {
-    SDL_Surface* attack[SNAKE_ENEMY_ATTACK_SPRITE_LEN];
-    SDL_Surface* dead[SNAKE_ENEMY_DEAD_SPRITE_LEN];
-    SDL_Surface* idle[SNAKE_ENEMY_IDLE_SPRITE_LEN];
-    SDL_Surface* walk[SNAKE_ENEMY_WALK_SPRITE_LEN];
+    SDL_Surface* attack[HTZ_ENEMY_ATTACK_SPRITE_LEN];
+    SDL_Surface* dead[HTZ_ENEMY_DEAD_SPRITE_LEN];
+    SDL_Surface* idle[HTZ_ENEMY_IDLE_SPRITE_LEN];
+    SDL_Surface* walk[HTZ_ENEMY_WALK_SPRITE_LEN];
 };
 
 static struct enemy_sprites enemy_male_sprites   = {0};
@@ -93,17 +93,17 @@ static const char* enemy_sprite_fmt(enum enemy_gender gender, enum enemy_state s
 static uint32_t enemy_sprite_animation_len(const struct enemy* enemy) {
     switch (enemy->state) {
     case ENEMY_STATE_ATTACK:
-        return SNAKE_ENEMY_ATTACK_SPRITE_LEN;
+        return HTZ_ENEMY_ATTACK_SPRITE_LEN;
 
     case ENEMY_STATE_DYING:
     case ENEMY_STATE_DEAD:
-        return SNAKE_ENEMY_DEAD_SPRITE_LEN;
+        return HTZ_ENEMY_DEAD_SPRITE_LEN;
 
     case ENEMY_STATE_IDLE:
-        return SNAKE_ENEMY_IDLE_SPRITE_LEN;
+        return HTZ_ENEMY_IDLE_SPRITE_LEN;
 
     case ENEMY_STATE_WALK:
-        return SNAKE_ENEMY_WALK_SPRITE_LEN;
+        return HTZ_ENEMY_WALK_SPRITE_LEN;
 
     default:
         assert(false && "unsupported enemy state");
@@ -162,7 +162,7 @@ static int load_sprite(enum enemy_gender gender, enum enemy_state state, int spr
 
 int enemy_init_sprites(void)
 {
-    for (int i = 0; i < SNAKE_ENEMY_ATTACK_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_ATTACK_SPRITE_LEN; i++) {
         if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_ATTACK, i, &enemy_male_sprites.attack[i]) != 0) {
             return 1;
         }
@@ -170,7 +170,7 @@ int enemy_init_sprites(void)
             return 1;
         }
     }
-    for (int i = 0; i < SNAKE_ENEMY_DEAD_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_DEAD_SPRITE_LEN; i++) {
         if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_DEAD, i, &enemy_male_sprites.dead[i]) != 0) {
             return 1;
         }
@@ -178,7 +178,7 @@ int enemy_init_sprites(void)
             return 1;
         }
     }
-    for (int i = 0; i < SNAKE_ENEMY_IDLE_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_IDLE_SPRITE_LEN; i++) {
         if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_IDLE, i, &enemy_male_sprites.idle[i]) != 0) {
             return 1;
         }
@@ -186,7 +186,7 @@ int enemy_init_sprites(void)
             return 1;
         }
     }
-    for (int i = 0; i < SNAKE_ENEMY_WALK_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_WALK_SPRITE_LEN; i++) {
         if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_WALK, i, &enemy_male_sprites.walk[i]) != 0) {
             return 1;
         }
@@ -199,19 +199,19 @@ int enemy_init_sprites(void)
 
 void enemy_free_sprites(void)
 {
-    for (int i = 0; i < SNAKE_ENEMY_ATTACK_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_ATTACK_SPRITE_LEN; i++) {
         SDL_FreeSurface(enemy_male_sprites.attack[i]);
         SDL_FreeSurface(enemy_female_sprites.attack[i]);
     }
-    for (int i = 0; i < SNAKE_ENEMY_DEAD_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_DEAD_SPRITE_LEN; i++) {
         SDL_FreeSurface(enemy_male_sprites.dead[i]);
         SDL_FreeSurface(enemy_female_sprites.dead[i]);
     }
-    for (int i = 0; i < SNAKE_ENEMY_IDLE_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_IDLE_SPRITE_LEN; i++) {
         SDL_FreeSurface(enemy_male_sprites.idle[i]);
         SDL_FreeSurface(enemy_female_sprites.idle[i]);
     }
-    for (int i = 0; i < SNAKE_ENEMY_WALK_SPRITE_LEN; i++) {
+    for (int i = 0; i < HTZ_ENEMY_WALK_SPRITE_LEN; i++) {
         SDL_FreeSurface(enemy_male_sprites.walk[i]);
         SDL_FreeSurface(enemy_female_sprites.walk[i]);
     }

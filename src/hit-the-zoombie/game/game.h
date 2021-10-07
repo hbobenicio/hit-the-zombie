@@ -1,5 +1,5 @@
-#ifndef SNAKE_GAME_H
-#define SNAKE_GAME_H
+#ifndef HTZ_GAME_H
+#define HTZ_GAME_H
 
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_mixer.h>

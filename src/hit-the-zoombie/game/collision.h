@@ -1,5 +1,5 @@
-#ifndef SNAKE_GAME_COLLISION_H
-#define SNAKE_GAME_COLLISION_H
+#ifndef HTZ_GAME_COLLISION_H
+#define HTZ_GAME_COLLISION_H
 
 #include <stdbool.h>
 

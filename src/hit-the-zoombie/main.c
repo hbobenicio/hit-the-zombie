@@ -44,7 +44,7 @@ int main() {
     }
 
     SDL_Window* window = SDL_CreateWindow(
-        "Zoombie - Point'n'Click",
+        "Hit The Zoombie!",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT,

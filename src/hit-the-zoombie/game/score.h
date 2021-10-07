@@ -1,5 +1,5 @@
-#ifndef SNAKE_GAME_SCORE_H
-#define SNAKE_GAME_SCORE_H
+#ifndef HTZ_GAME_SCORE_H
+#define HTZ_GAME_SCORE_H
 
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_pixels.h>

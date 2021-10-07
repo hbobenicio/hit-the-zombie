@@ -1,9 +1,9 @@
 SRC = \
-	$(wildcard src/snake/game/*.c) \
-	$(wildcard src/snake/*.c)
+	$(wildcard src/hit-the-zoombie/game/*.c) \
+	$(wildcard src/hit-the-zoombie/*.c)
 OBJ = $(SRC:.c=.o)
 DEP = $(OBJ:.o=.d)
-BIN = snake
+BIN = hit-the-zoombie
 
 PKG_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_image SDL2_ttf SDL2_mixer)
 PKG_LDLIBS := $(shell pkg-config --libs sdl2 SDL2_image SDL2_ttf SDL2_mixer)

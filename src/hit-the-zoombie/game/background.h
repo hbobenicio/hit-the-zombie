@@ -1,5 +1,5 @@
-#ifndef SNAKE_GAME_BACKGROUND_H
-#define SNAKE_GAME_BACKGROUND_H
+#ifndef HTZ_GAME_BACKGROUND_H
+#define HTZ_GAME_BACKGROUND_H
 
 #include <SDL2/SDL_render.h>
 
