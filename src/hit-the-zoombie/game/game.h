@@ -11,6 +11,7 @@ struct game {
     struct enemy enemy;
     struct score score;
     Mix_Chunk* hit_snd;
+    uint32_t respawn_timer;
 };
 
 int game_init(struct game* game);

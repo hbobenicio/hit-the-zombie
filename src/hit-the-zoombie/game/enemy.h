@@ -43,7 +43,7 @@ struct enemy {
 int enemy_init_sprites(void);
 void enemy_free_sprites(void);
 
-int enemy_init(struct enemy* enemy, enum enemy_gender gender);
+int enemy_init(struct enemy* enemy);
 int enemy_render(struct enemy* enemy, SDL_Renderer* renderer);
 void enemy_set_state(struct enemy* enemy, enum enemy_state new_state);
 void enemy_update(struct enemy* enemy, bool* out_hit);

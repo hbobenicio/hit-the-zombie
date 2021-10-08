@@ -33,7 +33,7 @@ int game_init(struct game* game)
 
     // objects initialization
 
-    if (enemy_init(&game->enemy, ENEMY_GENDER_FEMALE) != 0) {
+    if (enemy_init(&game->enemy) != 0) {
         fprintf(stderr, "error: game: failed to init enemy\n");
         goto err_mix_close_wav;
     }
@@ -85,12 +85,19 @@ int game_render(struct game* game, SDL_Renderer* renderer)
 
 void game_update(struct game* game)
 {
-    bool enemy_hit = false;
-    enemy_update(&game->enemy, &enemy_hit);
-    if (enemy_hit) {
-        if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
-            fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
+    if (game->enemy.state != ENEMY_STATE_DEAD) {
+        bool enemy_hit = false;
+        enemy_update(&game->enemy, &enemy_hit);
+        if (enemy_hit) {
+            game->respawn_timer = SDL_GetTicks();
+            if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
+                fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
+            }
+            score_inc(&game->score);
         }
-        score_inc(&game->score);
+    } else {
+        if (SDL_GetTicks() - game->respawn_timer > 2000) {
+            enemy_init(&game->enemy);
+        }
     }
 }

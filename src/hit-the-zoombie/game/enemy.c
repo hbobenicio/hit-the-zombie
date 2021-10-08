@@ -218,7 +218,7 @@ void enemy_free_sprites(void)
     }
 }
 
-int enemy_init(struct enemy* enemy, enum enemy_gender gender)
+int enemy_init(struct enemy* enemy)
 {
     // TODO check if every animation sprite have these sizes
     static const int sprite_width = 521, sprite_height = 576;
@@ -231,11 +231,18 @@ int enemy_init(struct enemy* enemy, enum enemy_gender gender)
         .w = sprite_width / 2,
         .h = sprite_height / 2,
     };
-    enemy->gender = gender;
-    // enemy->state = ENEMY_STATE_IDLE;
+    enemy->gender = (random_range_int(0, 1) == 0) ? ENEMY_GENDER_MALE : ENEMY_GENDER_FEMALE;
     enemy->state = ENEMY_STATE_WALK;
-    enemy->direction = ENEMY_DIRECTION_RIGHT;
-    enemy->velocity = 10;
+
+    int random_dir = random_range_int(0, 1);
+    if (random_dir == 0) {
+        enemy->direction = ENEMY_DIRECTION_RIGHT;
+        enemy->velocity = 10; // NOTE this could be improved by a increasing value based on current score
+    } else {
+        enemy->direction = ENEMY_DIRECTION_LEFT;
+        enemy->velocity = -10; // NOTE this could be improved by a increasing value based on current score
+    }
+
     enemy->animation_tick = SDL_GetTicks();
     enemy->animation_sprite_index = 0;
     return 0;
