@@ -12,26 +12,18 @@
 #include "screen.h"
 #include "collision.h"
 
-#define MALE_ATTACK_SPRITE_FMT   "./assets/zombiefiles/png/male/Attack (%d).png"
 #define MALE_DEAD_SPRITE_FMT     "./assets/zombiefiles/png/male/Dead (%d).png"
-#define MALE_IDLE_SPRITE_FMT     "./assets/zombiefiles/png/male/Idle (%d).png"
 #define MALE_WALK_SPRITE_FMT     "./assets/zombiefiles/png/male/Walk (%d).png"
 
-#define FEMALE_ATTACK_SPRITE_FMT "./assets/zombiefiles/png/female/Attack (%d).png"
 #define FEMALE_DEAD_SPRITE_FMT   "./assets/zombiefiles/png/female/Dead (%d).png"
-#define FEMALE_IDLE_SPRITE_FMT   "./assets/zombiefiles/png/female/Idle (%d).png"
 #define FEMALE_WALK_SPRITE_FMT   "./assets/zombiefiles/png/female/Walk (%d).png"
 
 // TODO animation speed could raise according to the current score/difficulty (or the velocity itself could raise instead...)
-#define ATTACK_SPRITE_ANIMATION_DURATION_MS 32
 #define DEAD_SPRITE_ANIMATION_DURATION_MS   64
-#define IDLE_SPRITE_ANIMATION_DURATION_MS   32
 #define WALK_SPRITE_ANIMATION_DURATION_MS   44
 
 struct enemy_sprites {
-    SDL_Surface* attack[HTZ_ENEMY_ATTACK_SPRITE_LEN];
     SDL_Surface* dead[HTZ_ENEMY_DEAD_SPRITE_LEN];
-    SDL_Surface* idle[HTZ_ENEMY_IDLE_SPRITE_LEN];
     SDL_Surface* walk[HTZ_ENEMY_WALK_SPRITE_LEN];
 };
 
@@ -73,15 +65,9 @@ static struct enemy_sprites* enemy_sprites(const struct enemy* enemy) {
 
 static const char* enemy_sprite_fmt(enum enemy_gender gender, enum enemy_state state) {
     switch (state) {
-    case ENEMY_STATE_ATTACK:
-        return (gender == ENEMY_GENDER_MALE) ? MALE_ATTACK_SPRITE_FMT : FEMALE_ATTACK_SPRITE_FMT;
-
     case ENEMY_STATE_DYING:
     case ENEMY_STATE_DEAD:
         return (gender == ENEMY_GENDER_MALE) ? MALE_DEAD_SPRITE_FMT : FEMALE_DEAD_SPRITE_FMT;
-
-    case ENEMY_STATE_IDLE:
-        return (gender == ENEMY_GENDER_MALE) ? MALE_IDLE_SPRITE_FMT : FEMALE_IDLE_SPRITE_FMT;
 
     case ENEMY_STATE_WALK:
         return (gender == ENEMY_GENDER_MALE) ? MALE_WALK_SPRITE_FMT : FEMALE_WALK_SPRITE_FMT;
@@ -93,15 +79,9 @@ static const char* enemy_sprite_fmt(enum enemy_gender gender, enum enemy_state s
 
 static uint32_t enemy_sprite_animation_len(const struct enemy* enemy) {
     switch (enemy->state) {
-    case ENEMY_STATE_ATTACK:
-        return HTZ_ENEMY_ATTACK_SPRITE_LEN;
-
     case ENEMY_STATE_DYING:
     case ENEMY_STATE_DEAD:
         return HTZ_ENEMY_DEAD_SPRITE_LEN;
-
-    case ENEMY_STATE_IDLE:
-        return HTZ_ENEMY_IDLE_SPRITE_LEN;
 
     case ENEMY_STATE_WALK:
         return HTZ_ENEMY_WALK_SPRITE_LEN;
@@ -113,15 +93,9 @@ static uint32_t enemy_sprite_animation_len(const struct enemy* enemy) {
 
 static uint32_t enemy_sprite_animation_duration_ms(const struct enemy* enemy) {
     switch (enemy->state) {
-    case ENEMY_STATE_ATTACK:
-        return ATTACK_SPRITE_ANIMATION_DURATION_MS;
-
     case ENEMY_STATE_DYING:
     case ENEMY_STATE_DEAD:
         return DEAD_SPRITE_ANIMATION_DURATION_MS;
-
-    case ENEMY_STATE_IDLE:
-        return IDLE_SPRITE_ANIMATION_DURATION_MS;
 
     case ENEMY_STATE_WALK:
         return WALK_SPRITE_ANIMATION_DURATION_MS;
@@ -163,27 +137,11 @@ static int load_sprite(enum enemy_gender gender, enum enemy_state state, int spr
 
 int enemy_init_sprites(void)
 {
-    for (int i = 0; i < HTZ_ENEMY_ATTACK_SPRITE_LEN; i++) {
-        if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_ATTACK, i, &enemy_male_sprites.attack[i]) != 0) {
-            return 1;
-        }
-        if (load_sprite(ENEMY_GENDER_FEMALE, ENEMY_STATE_ATTACK, i, &enemy_female_sprites.attack[i]) != 0) {
-            return 1;
-        }
-    }
     for (int i = 0; i < HTZ_ENEMY_DEAD_SPRITE_LEN; i++) {
         if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_DEAD, i, &enemy_male_sprites.dead[i]) != 0) {
             return 1;
         }
         if (load_sprite(ENEMY_GENDER_FEMALE, ENEMY_STATE_DEAD, i, &enemy_female_sprites.dead[i]) != 0) {
-            return 1;
-        }
-    }
-    for (int i = 0; i < HTZ_ENEMY_IDLE_SPRITE_LEN; i++) {
-        if (load_sprite(ENEMY_GENDER_MALE, ENEMY_STATE_IDLE, i, &enemy_male_sprites.idle[i]) != 0) {
-            return 1;
-        }
-        if (load_sprite(ENEMY_GENDER_FEMALE, ENEMY_STATE_IDLE, i, &enemy_female_sprites.idle[i]) != 0) {
             return 1;
         }
     }
@@ -200,17 +158,9 @@ int enemy_init_sprites(void)
 
 void enemy_free_sprites(void)
 {
-    for (int i = 0; i < HTZ_ENEMY_ATTACK_SPRITE_LEN; i++) {
-        SDL_FreeSurface(enemy_male_sprites.attack[i]);
-        SDL_FreeSurface(enemy_female_sprites.attack[i]);
-    }
     for (int i = 0; i < HTZ_ENEMY_DEAD_SPRITE_LEN; i++) {
         SDL_FreeSurface(enemy_male_sprites.dead[i]);
         SDL_FreeSurface(enemy_female_sprites.dead[i]);
-    }
-    for (int i = 0; i < HTZ_ENEMY_IDLE_SPRITE_LEN; i++) {
-        SDL_FreeSurface(enemy_male_sprites.idle[i]);
-        SDL_FreeSurface(enemy_female_sprites.idle[i]);
     }
     for (int i = 0; i < HTZ_ENEMY_WALK_SPRITE_LEN; i++) {
         SDL_FreeSurface(enemy_male_sprites.walk[i]);
@@ -221,6 +171,20 @@ void enemy_free_sprites(void)
 int enemy_init(struct enemy* enemy)
 {
     // TODO check if every animation sprite have these sizes
+    // idle:
+    //     width: 297
+    //         start: 73
+    //         end: 370
+    //     height: 457
+    //         start: 50
+    //         end: 507
+    // dead:
+    //     width: 590
+    //         start: 0
+    //         end: 590
+    //     height: 455
+    //         start: 34
+    //         end: 489
     static const int sprite_width = 521, sprite_height = 576;
 
     int x = random_range_int(0, SCREEN_WIDTH - sprite_width - 5);
@@ -254,22 +218,15 @@ int enemy_render(struct enemy* enemy, SDL_Renderer* renderer)
 
     SDL_Texture* texture = NULL;
     switch (enemy->state) {
-    case ENEMY_STATE_ATTACK:
-        texture = SDL_CreateTextureFromSurface(renderer, sprites->attack[enemy->animation_sprite_index]);
-        break;
-
     case ENEMY_STATE_DYING:
         texture = SDL_CreateTextureFromSurface(renderer, sprites->dead[enemy->animation_sprite_index]);
-        break;
-
-    case ENEMY_STATE_IDLE:
-        texture = SDL_CreateTextureFromSurface(renderer, sprites->idle[enemy->animation_sprite_index]);
         break;
 
     case ENEMY_STATE_WALK:
         texture = SDL_CreateTextureFromSurface(renderer, sprites->walk[enemy->animation_sprite_index]);
         break;
 
+    // case the enemy is dead, we only texture we use is the last one.
     case ENEMY_STATE_DEAD:
         texture = SDL_CreateTextureFromSurface(renderer, sprites->dead[enemy_sprite_animation_len(enemy) - 1]);
         break;
@@ -316,10 +273,9 @@ void enemy_set_state(struct enemy* enemy, enum enemy_state new_state)
     enemy->animation_tick = SDL_GetTicks();
 }
 
-// NOTE current limitation: animations are linear. maybe could be improved in some no linear fashion (function parametrization)
 void enemy_update(struct enemy* enemy, bool* out_hit)
 {
-    // dead enemy => noop
+    // if the enemy is dead then there is nothing to update
     if (enemy->state == ENEMY_STATE_DEAD) {
         return;
     }

@@ -15,7 +15,7 @@ CFLAGS  = -Wall -Wextra -pedantic -std=c17 -MMD -I ./src/ $(PKG_CFLAGS)
 LDFLAGS = -Wall -Wextra -pedantic -std=c17
 LDLIBS  = $(PKG_LDLIBS)
 
-.PHONY: all release debug distclean clean
+.PHONY: all release debug install distclean clean
 
 all: debug
 
@@ -46,6 +46,9 @@ $(BIN): $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 -include $(DEP)
+
+install:
+	install $(BIN) $(HOME)/bin/
 
 distclean: clean
 	rm -f $(BIN)

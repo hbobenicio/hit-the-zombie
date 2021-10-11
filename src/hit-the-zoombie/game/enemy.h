@@ -5,9 +5,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 
-#define HTZ_ENEMY_ATTACK_SPRITE_LEN 8
 #define HTZ_ENEMY_DEAD_SPRITE_LEN 9
-#define HTZ_ENEMY_IDLE_SPRITE_LEN 15
 #define HTZ_ENEMY_WALK_SPRITE_LEN 10
 
 enum enemy_gender {
@@ -16,10 +14,8 @@ enum enemy_gender {
 };
 
 enum enemy_state {
-    ENEMY_STATE_ATTACK,
-    ENEMY_STATE_DYING,
-    ENEMY_STATE_IDLE,
     ENEMY_STATE_WALK,
+    ENEMY_STATE_DYING,
     ENEMY_STATE_DEAD,
 };
 
