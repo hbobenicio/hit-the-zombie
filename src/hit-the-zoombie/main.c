@@ -50,8 +50,8 @@ int main() {
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
-        // SDL_WINDOW_SHOWN
-        SDL_WINDOW_FULLSCREEN
+        SDL_WINDOW_SHOWN
+        // SDL_WINDOW_FULLSCREEN
     );
     if (window == NULL) {
         fprintf(stderr, "error: sdl2: failed to create window: %s\n", SDL_GetError());

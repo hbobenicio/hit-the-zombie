@@ -22,6 +22,8 @@
 #define DEAD_SPRITE_ANIMATION_DURATION_MS   64
 #define WALK_SPRITE_ANIMATION_DURATION_MS   44
 
+#define SPRITE_SCALING_RATIO 2
+
 struct enemy_sprites {
     SDL_Surface* dead[HTZ_ENEMY_DEAD_SPRITE_LEN];
     SDL_Surface* walk[HTZ_ENEMY_WALK_SPRITE_LEN];
@@ -105,6 +107,66 @@ static uint32_t enemy_sprite_animation_duration_ms(const struct enemy* enemy) {
     }
 }
 
+/**
+ * walk:
+ *     width: 338
+ *         start: 17
+ *         end: 355
+ *     height: 477
+ *         start: 41
+ *         end: 518
+ * dead:
+ *     width: 590
+ *         start: 0
+ *         end: 590
+ *     height: 455
+ *         start: 34
+ *         end: 489
+ */ 
+static SDL_Rect enemy_sprite_male_rect(enum enemy_state state) {
+    switch (state)
+    {
+    case ENEMY_STATE_WALK:
+        return (SDL_Rect) { .x = 17, .y = 41, .w = 338, .h = 477 };
+        
+    case ENEMY_STATE_DYING:
+    case ENEMY_STATE_DEAD:
+        return (SDL_Rect) { .x = 0, .y = 34, .w = 590, .h = 455 };
+    
+    default:
+        assert(false && "unsupported enemy state");
+    }
+}
+
+/**
+ * walk:
+ *     width:  [93, 438]: 345
+ *     height: [35, 576]: 541
+ * dead:
+ *     width: [27, 604]: 577
+ *     height: [42, 598]: 556
+ */
+static SDL_Rect enemy_sprite_female_rect(enum enemy_state state) {
+    switch (state)
+    {
+    case ENEMY_STATE_WALK:
+        return (SDL_Rect) { .x = 93, .y = 35, .w = 345, .h =  541 };
+        
+    case ENEMY_STATE_DYING:
+    case ENEMY_STATE_DEAD:
+        return (SDL_Rect) { .x = 27, .y = 42, .w = 577, .h =  556 };
+    
+    default:
+        assert(false && "unsupported enemy state");
+    }
+}
+
+static SDL_Rect enemy_sprite_rect(enum enemy_gender gender, enum enemy_state state) {
+    if (gender == ENEMY_GENDER_MALE)   return enemy_sprite_male_rect(state);
+    if (gender == ENEMY_GENDER_FEMALE) return enemy_sprite_female_rect(state);
+    assert(false && "unsupported enemy gender");
+}
+
 static int load_sprite(enum enemy_gender gender, enum enemy_state state, int sprite_index, SDL_Surface** out_surface)
 {
     assert(out_surface != NULL);
@@ -170,36 +232,27 @@ void enemy_free_sprites(void)
 
 int enemy_init(struct enemy* enemy)
 {
-    // TODO check if every animation sprite have these sizes
-    // idle:
-    //     width: 297
-    //         start: 73
-    //         end: 370
-    //     height: 457
-    //         start: 50
-    //         end: 507
-    // dead:
-    //     width: 590
-    //         start: 0
-    //         end: 590
-    //     height: 455
-    //         start: 34
-    //         end: 489
-    static const int sprite_width = 521, sprite_height = 576;
+    // state setup
+    static const enum enemy_state initial_state = ENEMY_STATE_WALK;
+    enemy->state = initial_state;
 
-    int x = random_range_int(0, SCREEN_WIDTH - sprite_width - 5);
-    int y = random_range_int(150, SCREEN_HEIGHT - sprite_height - 5);
+    // gender setup
+    enemy->gender = (random_range_int(0, 1) == 0) ? ENEMY_GENDER_MALE : ENEMY_GENDER_FEMALE;
+
+    // bounding box setup
+    const SDL_Rect sprite_rect = enemy_sprite_rect(enemy->gender, initial_state);
+    static const int padding = 5;
+    int x = random_range_int(0, SCREEN_WIDTH - sprite_rect.w - padding);
+    int y = random_range_int(150, SCREEN_HEIGHT - sprite_rect.h - padding);
     enemy->box = (SDL_Rect) {
         .x = x,
         .y = y,
-        .w = sprite_width / 2,
-        .h = sprite_height / 2,
+        .w = sprite_rect.w / SPRITE_SCALING_RATIO, // NOTE the sprite is too big for our scene. 
+        .h = sprite_rect.h / SPRITE_SCALING_RATIO,
     };
-    enemy->gender = (random_range_int(0, 1) == 0) ? ENEMY_GENDER_MALE : ENEMY_GENDER_FEMALE;
-    enemy->state = ENEMY_STATE_WALK;
 
-    int random_dir = random_range_int(0, 1);
-    if (random_dir == 0) {
+    // direction and velocity setup
+    if (random_range_int(0, 1) == 0) {
         enemy->direction = ENEMY_DIRECTION_RIGHT;
         enemy->velocity = 10; // NOTE this could be improved by a increasing value based on current score
     } else {
@@ -207,6 +260,7 @@ int enemy_init(struct enemy* enemy)
         enemy->velocity = -10; // NOTE this could be improved by a increasing value based on current score
     }
 
+    // animation setup
     enemy->animation_tick = SDL_GetTicks();
     enemy->animation_sprite_index = 0;
     return 0;
@@ -239,19 +293,22 @@ int enemy_render(struct enemy* enemy, SDL_Renderer* renderer)
         return 1;
     }
 
+    SDL_Rect sprite_rect = enemy_sprite_rect(enemy->gender, enemy->state);
+
     // flip sprite if facing left
     if (enemy->direction == ENEMY_DIRECTION_LEFT) {
-        if (SDL_RenderCopyEx(renderer, texture, NULL, &enemy->box, 0.0, NULL, SDL_FLIP_HORIZONTAL) != 0) {
+        double angle = 0.0;
+        SDL_Point* center = NULL;
+        if (SDL_RenderCopyEx(renderer, texture, &sprite_rect, &enemy->box, angle, center, SDL_FLIP_HORIZONTAL) != 0) {
             fprintf(stderr, "error: sdl2: sdl_image: failed create texture from surface: %s\n", SDL_GetError());
             goto err_destroy_texture;
         }
     } else {
-        if (SDL_RenderCopy(renderer, texture, NULL, &enemy->box) != 0) {
+        if (SDL_RenderCopy(renderer, texture, &sprite_rect, &enemy->box) != 0) {
             fprintf(stderr, "error: sdl2: sdl_image: failed create texture from surface: %s\n", SDL_GetError());
             goto err_destroy_texture;
         }
     }
-
 
     #ifdef DEBUG_BOUNDING_BOX
     SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
@@ -269,6 +326,11 @@ err_destroy_texture:
 void enemy_set_state(struct enemy* enemy, enum enemy_state new_state)
 {
     enemy->state = new_state;
+    
+    SDL_Rect sprite_rect = enemy_sprite_rect(enemy->gender, new_state);
+    enemy->box.w = sprite_rect.w / SPRITE_SCALING_RATIO;
+    enemy->box.h = sprite_rect.h / SPRITE_SCALING_RATIO;
+
     enemy->animation_sprite_index = 0;
     enemy->animation_tick = SDL_GetTicks();
 }
