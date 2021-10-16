@@ -6,10 +6,14 @@
 
 #include "enemy.h"
 #include "score.h"
+#include "fps_timer.h"
 
 struct game {
     struct enemy enemy;
     struct score score;
+    struct fps_timer fps_timer;
+
+    TTF_Font* jetbrains_mono_regular_font;
     Mix_Chunk* hit_snd;
     uint32_t respawn_timer;
 };

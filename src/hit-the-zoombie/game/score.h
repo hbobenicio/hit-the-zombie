@@ -12,10 +12,7 @@ struct score {
     int value;
 };
 
-int score_init_font(void);
-void score_free_font(void);
-
-void score_init(struct score* score);
+void score_init(struct score* score, TTF_Font* font);
 void score_inc(struct score* score);
 int score_render(struct score* score, SDL_Renderer* renderer);
 

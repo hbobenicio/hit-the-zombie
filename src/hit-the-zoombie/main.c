@@ -55,7 +55,6 @@ int main() {
     );
     if (window == NULL) {
         fprintf(stderr, "error: sdl2: failed to create window: %s\n", SDL_GetError());
-        // goto err_mix_quit;
         goto err_mix_close_audio;
     }
 
@@ -72,10 +71,8 @@ int main() {
     }
 
     const uint32_t expected_frame_duration_ms = 1000 / FRAME_RATE;
-    double fps = -1.0;
     while (true) {
         uint32_t frame_start_ms = SDL_GetTicks();
-        // Poll events and Update State
         {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
@@ -93,7 +90,6 @@ int main() {
                 }
             }
         }
-        
         game_update(&game);
 
         if (game_render(&game, renderer) != 0) {
@@ -101,39 +97,12 @@ int main() {
             goto err_game_free;
         }
 
-        if (fps >= 0.0) {
-            // TODO move this to a custom entity and encapsulate the rendering inside game
-            char fps_txt[16];
-            const int fps_txt_size = sizeof(fps_txt) / sizeof(fps_txt[0]);
-
-            int nprinted = snprintf(fps_txt, fps_txt_size, "Score: %.1lf", fps);
-            assert(nprinted > 0 && nprinted < fps_txt_size);
-
-            SDL_Surface* fps_surface = TTF_RenderText_Solid(game.score.font, fps_txt, game.score.color);
-            assert(fps_surface != NULL);
-
-            SDL_Texture* fps_texture = SDL_CreateTextureFromSurface(renderer, fps_surface);
-            assert(fps_texture != NULL);
-
-            SDL_FreeSurface(fps_surface);
-            fps_surface = NULL;
-
-            SDL_Rect fps_txt_box = { .x = game.score.box.x, .y = SCREEN_HEIGHT - 100, .w = 150, .h = 100 + 10 };
-            assert(SDL_RenderCopy(renderer, fps_texture, NULL, &fps_txt_box) == 0);
-
-            SDL_DestroyTexture(fps_texture);
-        }
-
         SDL_RenderPresent(renderer);
 
-        uint32_t frame_end_ms = SDL_GetTicks();
-        uint32_t actual_frame_duration_ms = frame_end_ms - frame_start_ms;
-        if (actual_frame_duration_ms < expected_frame_duration_ms) {
-            uint32_t delay = expected_frame_duration_ms - actual_frame_duration_ms;
+        uint32_t frame_duration_ms = SDL_GetTicks() - frame_start_ms;
+        if (frame_duration_ms < expected_frame_duration_ms) {
+            uint32_t delay = expected_frame_duration_ms - frame_duration_ms;
             SDL_Delay(delay);
-
-            uint32_t frame_render_duration = SDL_GetTicks() - frame_start_ms;
-            fps = 1.0 / (frame_render_duration / 1000.0);
         }
     }
 
@@ -141,7 +110,6 @@ exit_main_loop:
     game_free(&game);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    // Mix_Quit();
     Mix_CloseAudio();
     TTF_Quit();
     IMG_Quit();
@@ -157,8 +125,6 @@ err_sdl_destroy_renderer:
 err_sdl_destroy_window:
     SDL_DestroyWindow(window);
 
-// err_mix_quit:
-//     Mix_Quit();
 err_mix_close_audio:
     Mix_CloseAudio();
 

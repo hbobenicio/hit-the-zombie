@@ -6,50 +6,47 @@
 #include "background.h"
 #include "score.h"
 
+#define JETBRAINS_MONO_REGULAR_TTF_FILE_PATH "/home/hugo/.local/share/fonts/JetBrainsMono-Regular.ttf"
+
 int game_init(struct game* game)
 {
-    // static initialization
-
-    if (score_init_font() != 0) {
-        fprintf(stderr, "error: game: failed to init font\n");
+    if (enemy_init_sprites() != 0) {
+        fprintf(stderr, "error: game: failed to init enemy sprites\n");
         return 1;
     }
 
-    if (enemy_init_sprites() != 0) {
-        fprintf(stderr, "error: game: failed to init enemy sprites\n");
-        goto err_score_free_font;
+    game->jetbrains_mono_regular_font = TTF_OpenFont(JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, 24);
+    if (game->jetbrains_mono_regular_font == NULL) {
+        fprintf(stderr, "error: game: failed to init font '%s': %s", JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, TTF_GetError());
+        goto err_enemy_free_sprites;
     }
 
     // const char* hit_snd_file_path = "./assets/mixkit-small-hit-in-a-game-2072.wav";
     const char* hit_snd_file_path = "./assets/mixkit-boxer-getting-hit-2055.wav";
     game->hit_snd = Mix_LoadWAV(hit_snd_file_path);
     if (game->hit_snd == NULL) {
-        fprintf(stderr,
-            "error: game: failed to load hit sound effects from wav '%s': %s\n",
-            hit_snd_file_path, Mix_GetError()
-        );
-        goto err_enemy_free_sprites;
+        fprintf(stderr, "error: game: failed to load hit sound effects from wav '%s': %s\n", hit_snd_file_path, Mix_GetError());
+        goto err_ttf_close_font;
     }
-
-    // objects initialization
 
     if (enemy_init(&game->enemy) != 0) {
         fprintf(stderr, "error: game: failed to init enemy\n");
         goto err_mix_close_wav;
     }
 
-    score_init(&game->score);
+    score_init(&game->score, game->jetbrains_mono_regular_font);
+    fps_timer_init(&game->fps_timer, game->jetbrains_mono_regular_font);
 
     return 0;
 
 err_mix_close_wav:
     Mix_FreeChunk(game->hit_snd);
 
+err_ttf_close_font:
+    TTF_CloseFont(game->jetbrains_mono_regular_font);
+
 err_enemy_free_sprites:
     enemy_free_sprites();
-
-err_score_free_font:
-    score_free_font();
 
     return 1;
 }
@@ -58,9 +55,11 @@ void game_free(struct game* game)
 {
     Mix_FreeChunk(game->hit_snd);
     game->hit_snd = NULL;
-    
+
+    TTF_CloseFont(game->jetbrains_mono_regular_font);
+    game->jetbrains_mono_regular_font = NULL;
+
     enemy_free_sprites();
-    score_free_font();
 }
 
 int game_render(struct game* game, SDL_Renderer* renderer)
@@ -80,11 +79,17 @@ int game_render(struct game* game, SDL_Renderer* renderer)
         return 1;
     }
 
+    if (fps_timer_render(&game->fps_timer, renderer) != 0) {
+        fprintf(stderr, "error: game: fps timer rendering failed\n");
+    }
+
     return 0;
 }
 
 void game_update(struct game* game)
 {
+    fps_timer_update(&game->fps_timer);
+    
     if (game->enemy.state != ENEMY_STATE_DEAD) {
         bool enemy_hit = false;
         enemy_update(&game->enemy, &enemy_hit);

@@ -3,27 +3,7 @@
 #include <assert.h>
 #include <SDL2/SDL_ttf.h>
 
-#define JETBRAINS_MONO_REGULAR_TTF_FILE_PATH "/home/hugo/.local/share/fonts/JetBrainsMono-Regular.ttf"
-
-static TTF_Font* jetbrains_mono_regular_font = NULL;
-
-int score_init_font(void)
-{
-    jetbrains_mono_regular_font = TTF_OpenFont(JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, 24);
-    if (jetbrains_mono_regular_font == NULL) {
-        fprintf(stderr, "error: score: failed to init font '%s': %s", JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, TTF_GetError());
-        return 1;
-    }
-
-    return 0;
-}
-
-void score_free_font(void)
-{
-    TTF_CloseFont(jetbrains_mono_regular_font);
-}
-
-void score_init(struct score* score)
+void score_init(struct score* score, TTF_Font* font)
 {
     score->box = (SDL_Rect) {
         .x = 10,
@@ -37,7 +17,7 @@ void score_init(struct score* score)
         .b = 255,
         .a = 255,
     };
-    score->font = jetbrains_mono_regular_font;
+    score->font = font;
     score->value = 0;
 }
 
