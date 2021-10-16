@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <assert.h>
+
+#include <stb_ds.h>
 
 #include "background.h"
 #include "score.h"
@@ -29,10 +32,12 @@ int game_init(struct game* game)
         goto err_ttf_close_font;
     }
 
-    if (zoombie_init(&game->zoombie) != 0) {
+    struct zoombie zoombie = {0};
+    if (zoombie_init(&zoombie) != 0) {
         fprintf(stderr, "error: game: failed to init zoombie\n");
         goto err_mix_close_wav;
     }
+    arrpush(game->zoombies, zoombie);
 
     score_init(&game->score, game->jetbrains_mono_regular_font);
     fps_timer_init(&game->fps_timer, game->jetbrains_mono_regular_font);
@@ -69,9 +74,11 @@ int game_render(struct game* game, SDL_Renderer* renderer)
         return 1;
     }
 
-    if (zoombie_render(&game->zoombie, renderer) != 0) {
-        fprintf(stderr, "error: game: zoombie rendering failed\n");
-        return 1;
+    for (long i = 0; i < arrlen(game->zoombies); i++) {
+        if (zoombie_render(&game->zoombies[i], renderer) != 0) {
+            fprintf(stderr, "error: game: zoombie rendering failed\n");
+            return 1;
+        }
     }
 
     if (score_render(&game->score, renderer) != 0) {
@@ -89,20 +96,32 @@ int game_render(struct game* game, SDL_Renderer* renderer)
 void game_update(struct game* game)
 {
     fps_timer_update(&game->fps_timer);
-    
-    if (game->zoombie.state != ZOOMBIE_STATE_DEAD) {
-        bool zoombie_hit = false;
-        zoombie_update(&game->zoombie, &zoombie_hit);
-        if (zoombie_hit) {
-            game->respawn_timer = SDL_GetTicks();
-            if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
-                fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
+
+    for (long i = 0; i < arrlen(game->zoombies); i++) {
+        if (game->zoombies[i].state != ZOOMBIE_STATE_DEAD) {
+            bool zoombie_hit = false;
+            zoombie_update(&game->zoombies[i], &zoombie_hit);
+
+            // TODO improve this to check zoombie hits only for the first visible (layer) zoombie
+            if (zoombie_hit) {
+                game->respawn_timer = SDL_GetTicks();
+                if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
+                    fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
+                }
+                score_inc(&game->score);
             }
-            score_inc(&game->score);
-        }
-    } else {
-        if (SDL_GetTicks() - game->respawn_timer > 2000) {
-            zoombie_init(&game->zoombie);
+        } else {
+            if (SDL_GetTicks() - game->respawn_timer > 2000) {
+
+                // The hit zoombie respawns without changing its index in the arraylist, just to make it stable
+                assert(zoombie_init(&game->zoombies[i]) == 0);
+
+                // A new zoombie then spawns
+                struct zoombie new_zoombie = {0};
+                assert(zoombie_init(&new_zoombie) == 0);
+
+                arrpush(game->zoombies, new_zoombie);
+            }
         }
     }
 }

@@ -9,7 +9,8 @@
 #include "fps_timer.h"
 
 struct game {
-    struct zoombie zoombie;
+    struct zoombie* zoombies;
+
     struct score score;
     struct fps_timer fps_timer;
 
