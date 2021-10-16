@@ -4,12 +4,12 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_mixer.h>
 
-#include "enemy.h"
+#include "zoombie.h"
 #include "score.h"
 #include "fps_timer.h"
 
 struct game {
-    struct enemy enemy;
+    struct zoombie zoombie;
     struct score score;
     struct fps_timer fps_timer;
 

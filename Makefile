@@ -11,7 +11,7 @@ PKG_LDLIBS := $(shell pkg-config --libs sdl2 SDL2_image SDL2_ttf SDL2_mixer)
 
 # MMD will generate a .d file for each .c module containing its Makefile rules (including dependencies)
 # These .d files are used with the `-include` bellow
-CFLAGS  = -Wall -Wextra -pedantic -std=c17 -MMD -I ./src/ $(PKG_CFLAGS)
+CFLAGS  = -Wall -Wextra -pedantic -std=c17 -MMD -I ./src/ -I ./vendor/stb/0.67/ $(PKG_CFLAGS)
 LDFLAGS = -Wall -Wextra -pedantic -std=c17
 LDLIBS  = $(PKG_LDLIBS)
 

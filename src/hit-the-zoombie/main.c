@@ -11,6 +11,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
+#define STB_DS_IMPLEMENTATION
+#include <stb_ds.h>
+
 #include "game/game.h"
 #include "game/screen.h"
 

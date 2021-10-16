@@ -10,15 +10,15 @@
 
 int game_init(struct game* game)
 {
-    if (enemy_init_sprites() != 0) {
-        fprintf(stderr, "error: game: failed to init enemy sprites\n");
+    if (zoombie_init_sprites() != 0) {
+        fprintf(stderr, "error: game: failed to init zoombie sprites\n");
         return 1;
     }
 
     game->jetbrains_mono_regular_font = TTF_OpenFont(JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, 24);
     if (game->jetbrains_mono_regular_font == NULL) {
         fprintf(stderr, "error: game: failed to init font '%s': %s", JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, TTF_GetError());
-        goto err_enemy_free_sprites;
+        goto err_zoombie_free_sprites;
     }
 
     // const char* hit_snd_file_path = "./assets/mixkit-small-hit-in-a-game-2072.wav";
@@ -29,8 +29,8 @@ int game_init(struct game* game)
         goto err_ttf_close_font;
     }
 
-    if (enemy_init(&game->enemy) != 0) {
-        fprintf(stderr, "error: game: failed to init enemy\n");
+    if (zoombie_init(&game->zoombie) != 0) {
+        fprintf(stderr, "error: game: failed to init zoombie\n");
         goto err_mix_close_wav;
     }
 
@@ -45,8 +45,8 @@ err_mix_close_wav:
 err_ttf_close_font:
     TTF_CloseFont(game->jetbrains_mono_regular_font);
 
-err_enemy_free_sprites:
-    enemy_free_sprites();
+err_zoombie_free_sprites:
+    zoombie_free_sprites();
 
     return 1;
 }
@@ -59,7 +59,7 @@ void game_free(struct game* game)
     TTF_CloseFont(game->jetbrains_mono_regular_font);
     game->jetbrains_mono_regular_font = NULL;
 
-    enemy_free_sprites();
+    zoombie_free_sprites();
 }
 
 int game_render(struct game* game, SDL_Renderer* renderer)
@@ -69,8 +69,8 @@ int game_render(struct game* game, SDL_Renderer* renderer)
         return 1;
     }
 
-    if (enemy_render(&game->enemy, renderer) != 0) {
-        fprintf(stderr, "error: game: enemy rendering failed\n");
+    if (zoombie_render(&game->zoombie, renderer) != 0) {
+        fprintf(stderr, "error: game: zoombie rendering failed\n");
         return 1;
     }
 
@@ -90,10 +90,10 @@ void game_update(struct game* game)
 {
     fps_timer_update(&game->fps_timer);
     
-    if (game->enemy.state != ENEMY_STATE_DEAD) {
-        bool enemy_hit = false;
-        enemy_update(&game->enemy, &enemy_hit);
-        if (enemy_hit) {
+    if (game->zoombie.state != ZOOMBIE_STATE_DEAD) {
+        bool zoombie_hit = false;
+        zoombie_update(&game->zoombie, &zoombie_hit);
+        if (zoombie_hit) {
             game->respawn_timer = SDL_GetTicks();
             if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
                 fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
@@ -102,7 +102,7 @@ void game_update(struct game* game)
         }
     } else {
         if (SDL_GetTicks() - game->respawn_timer > 2000) {
-            enemy_init(&game->enemy);
+            zoombie_init(&game->zoombie);
         }
     }
 }
