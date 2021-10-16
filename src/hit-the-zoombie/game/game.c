@@ -10,6 +10,7 @@
 #include "background.h"
 #include "score.h"
 
+#define MAX_ZOOMBIES 30
 #define JETBRAINS_MONO_REGULAR_TTF_FILE_PATH "/home/hugo/.local/share/fonts/JetBrainsMono-Regular.ttf"
 
 int game_init(struct game* game)
@@ -121,11 +122,11 @@ void game_update(struct game* game)
                 if (!zoombie_is_alive(zoombie))
                     break;
 
-                fprintf(stderr, "zoombie %ld has been hit!\n", i);
-
                 zoombie_set_state(zoombie, ZOOMBIE_STATE_DYING);
 
                 game->respawn_timers[i] = SDL_GetTicks();
+
+                // TODO how to prevent sound errors zoombies dies too fast? prevent playing this over and over...
                 if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
                     fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
                 }
@@ -148,12 +149,15 @@ void game_update(struct game* game)
                 // The hit zoombie respawns without changing its index in the arraylist, just to make it stable
                 assert(zoombie_init(&game->zoombies[i]) == 0);
 
-                // A new zoombie then spawns
+                // It then respawns
                 struct zoombie new_zoombie = {0};
                 assert(zoombie_init(&new_zoombie) == 0);
 
-                arrpush(game->zoombies, new_zoombie);
-                arrpush(game->respawn_timers, 0);
+                // But a new one spawns too only if we hadn't reach the limit
+                if (arrlen(game->zoombies) < MAX_ZOOMBIES) {
+                    arrpush(game->zoombies, new_zoombie);
+                    arrpush(game->respawn_timers, 0);
+                }
             }
             continue;
         }
