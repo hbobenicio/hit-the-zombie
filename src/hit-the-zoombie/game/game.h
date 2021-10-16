@@ -9,14 +9,15 @@
 #include "fps_timer.h"
 
 struct game {
+    // arrlen(zoombies) should always be equal to arrlen(respawn_timers)
     struct zoombie* zoombies;
+    uint32_t* respawn_timers;
 
     struct score score;
     struct fps_timer fps_timer;
 
     TTF_Font* jetbrains_mono_regular_font;
     Mix_Chunk* hit_snd;
-    uint32_t respawn_timer;
 };
 
 int game_init(struct game* game);

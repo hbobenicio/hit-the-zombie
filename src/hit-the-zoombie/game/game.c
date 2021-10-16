@@ -6,6 +6,7 @@
 
 #include <stb_ds.h>
 
+#include "collision.h"
 #include "background.h"
 #include "score.h"
 
@@ -38,6 +39,7 @@ int game_init(struct game* game)
         goto err_mix_close_wav;
     }
     arrpush(game->zoombies, zoombie);
+    arrpush(game->respawn_timers, 0);
 
     score_init(&game->score, game->jetbrains_mono_regular_font);
     fps_timer_init(&game->fps_timer, game->jetbrains_mono_regular_font);
@@ -58,6 +60,9 @@ err_zoombie_free_sprites:
 
 void game_free(struct game* game)
 {
+    arrfree(game->respawn_timers);
+    arrfree(game->zoombies);
+
     Mix_FreeChunk(game->hit_snd);
     game->hit_snd = NULL;
 
@@ -74,6 +79,7 @@ int game_render(struct game* game, SDL_Renderer* renderer)
         return 1;
     }
 
+    // NOTE worth parallelizing this?
     for (long i = 0; i < arrlen(game->zoombies); i++) {
         if (zoombie_render(&game->zoombies[i], renderer) != 0) {
             fprintf(stderr, "error: game: zoombie rendering failed\n");
@@ -97,21 +103,47 @@ void game_update(struct game* game)
 {
     fps_timer_update(&game->fps_timer);
 
-    for (long i = 0; i < arrlen(game->zoombies); i++) {
-        if (game->zoombies[i].state != ZOOMBIE_STATE_DEAD) {
-            bool zoombie_hit = false;
-            zoombie_update(&game->zoombies[i], &zoombie_hit);
+    // Hit Detection
+    int mouse_x = -1, mouse_y = -1;
+    uint32_t mouse_btn_state = SDL_GetMouseState(&mouse_x, &mouse_y);
+    if (mouse_btn_state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
 
-            // TODO improve this to check zoombie hits only for the first visible (layer) zoombie
-            if (zoombie_hit) {
-                game->respawn_timer = SDL_GetTicks();
+        // find a hit collision with the first (top) zoombie visible.
+        // NOTE: lower indexes are draw first, so they appear behind.
+        //       So we collision detection order is the inverse from the index from the zoombies arraylist.
+        for (long i = arrlen(game->zoombies) - 1; i >= 0; i--) {
+            struct zoombie* zoombie = &game->zoombies[i];
+
+            // if it hits a zoombie, start it's respawning timer, play the hit sound, score it
+            // then quit searching for other zoombie collisions
+            if (collision_rect_point(&zoombie->box, mouse_x, mouse_y)) {
+                // hit a dead body. skip searching for collisions behind it.
+                if (!zoombie_is_alive(zoombie))
+                    break;
+
+                fprintf(stderr, "zoombie %ld has been hit!\n", i);
+
+                zoombie_set_state(zoombie, ZOOMBIE_STATE_DYING);
+
+                game->respawn_timers[i] = SDL_GetTicks();
                 if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
                     fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
                 }
                 score_inc(&game->score);
+
+                // We just wanna check 1 hit per update, right?
+                break;
             }
-        } else {
-            if (SDL_GetTicks() - game->respawn_timer > 2000) {
+        }
+    }
+
+    // Sprites Update
+    for (long i = 0; i < arrlen(game->zoombies); i++) {
+
+        // if the zoombie is dead, there is no need in updating it.
+        // we just wait for it to respawn.
+        if (game->zoombies[i].state == ZOOMBIE_STATE_DEAD) {
+            if (SDL_GetTicks() - game->respawn_timers[i] > 2000) {
 
                 // The hit zoombie respawns without changing its index in the arraylist, just to make it stable
                 assert(zoombie_init(&game->zoombies[i]) == 0);
@@ -121,7 +153,11 @@ void game_update(struct game* game)
                 assert(zoombie_init(&new_zoombie) == 0);
 
                 arrpush(game->zoombies, new_zoombie);
+                arrpush(game->respawn_timers, 0);
             }
+            continue;
         }
+
+        zoombie_update(&game->zoombies[i]);
     }
 }
