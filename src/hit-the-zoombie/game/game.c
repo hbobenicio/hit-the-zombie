@@ -31,6 +31,7 @@ int game_init(struct game* game)
         goto err_background_free;
     }
 
+    // TODO 2055 sound wave could be clipped to be smaller and faster
     // const char* hit_snd_file_path = "./assets/mixkit-small-hit-in-a-game-2072.wav";
     const char* hit_snd_file_path = "./assets/mixkit-boxer-getting-hit-2055.wav";
     game->hit_snd = Mix_LoadWAV(hit_snd_file_path);
