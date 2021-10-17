@@ -313,10 +313,10 @@ int zoombie_render(struct zoombie* zoombie, SDL_Renderer* renderer)
         }
     }
 
-    #ifdef DEBUG_BOUNDING_BOX
+#ifdef DEBUG_BOUNDING_BOX
     SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &zoombie->box);
-    #endif
+#endif
 
     SDL_DestroyTexture(texture);
     return 0;

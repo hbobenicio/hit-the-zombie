@@ -14,7 +14,10 @@ struct game {
     uint32_t* respawn_timers;
 
     struct score score;
+
+#ifdef DEBUG_SHOW_FPS
     struct fps_timer fps_timer;
+#endif
 
     TTF_Font* jetbrains_mono_regular_font;
     Mix_Chunk* hit_snd;

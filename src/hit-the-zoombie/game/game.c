@@ -43,7 +43,10 @@ int game_init(struct game* game)
     arrpush(game->respawn_timers, 0);
 
     score_init(&game->score, game->jetbrains_mono_regular_font);
+
+#ifdef DEBUG_SHOW_FPS
     fps_timer_init(&game->fps_timer, game->jetbrains_mono_regular_font);
+#endif
 
     return 0;
 
@@ -93,16 +96,20 @@ int game_render(struct game* game, SDL_Renderer* renderer)
         return 1;
     }
 
+#ifdef DEBUG_SHOW_FPS
     if (fps_timer_render(&game->fps_timer, renderer) != 0) {
         fprintf(stderr, "error: game: fps timer rendering failed\n");
     }
+#endif
 
     return 0;
 }
 
 void game_update(struct game* game)
 {
+#ifdef DEBUG_SHOW_FPS
     fps_timer_update(&game->fps_timer);
+#endif
 
     // Hit Detection
     int mouse_x = -1, mouse_y = -1;
