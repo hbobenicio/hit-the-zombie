@@ -21,7 +21,7 @@
 
 int main() {
     srand(time(NULL));
-    
+
     // Maybe all of these initialization calls could be encapsulated in the game init function...
     // or at least in another function.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -38,7 +38,6 @@ int main() {
         fprintf(stderr, "error: sdl2: failed to init SDL2_ttf: %s\n", TTF_GetError());
         goto err_img_quit;
     }
-
     {
         int page_size = (int) sysconf(_SC_PAGESIZE);
         int chunk_size = (page_size == -1) ? 4098 : page_size;
@@ -47,14 +46,13 @@ int main() {
             goto err_ttf_quit;
         }
     }
-
     SDL_Window* window = SDL_CreateWindow(
         "Hit The Zoombie!",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
-        SDL_WINDOW_SHOWN
-        // SDL_WINDOW_FULLSCREEN
+        // SDL_WINDOW_SHOWN
+        SDL_WINDOW_FULLSCREEN
     );
     if (window == NULL) {
         fprintf(stderr, "error: sdl2: failed to create window: %s\n", SDL_GetError());
@@ -82,7 +80,7 @@ int main() {
                 switch (event.type) {
                 case SDL_QUIT:
                     goto exit_main_loop;
-                
+
                 case SDL_KEYDOWN:
                     if (event.key.keysym.sym == SDLK_ESCAPE)
                         goto exit_main_loop;

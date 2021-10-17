@@ -1,4 +1,5 @@
 /**/*.d
 /**/*.o
 /**/.vscode
-hit-the-zoombie
+/hit-the-zoombie
+gmon.out
