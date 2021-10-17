@@ -20,10 +20,15 @@ int game_init(struct game* game)
         return 1;
     }
 
+    if (background_init(&game->background) != 0) {
+        fprintf(stderr, "error: game: failed to init background\n");
+        goto err_zoombie_free_sprites;
+    }
+
     game->jetbrains_mono_regular_font = TTF_OpenFont(JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, 24);
     if (game->jetbrains_mono_regular_font == NULL) {
         fprintf(stderr, "error: game: failed to init font '%s': %s", JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, TTF_GetError());
-        goto err_zoombie_free_sprites;
+        goto err_background_free;
     }
 
     // const char* hit_snd_file_path = "./assets/mixkit-small-hit-in-a-game-2072.wav";
@@ -56,6 +61,9 @@ err_mix_close_wav:
 err_ttf_close_font:
     TTF_CloseFont(game->jetbrains_mono_regular_font);
 
+err_background_free:
+    background_free(&game->background);
+
 err_zoombie_free_sprites:
     zoombie_free_sprites();
 
@@ -73,12 +81,14 @@ void game_free(struct game* game)
     TTF_CloseFont(game->jetbrains_mono_regular_font);
     game->jetbrains_mono_regular_font = NULL;
 
+    background_free(&game->background);
+
     zoombie_free_sprites();
 }
 
 int game_render(struct game* game, SDL_Renderer* renderer)
 {
-    if (background_render(renderer) != 0) {
+    if (background_render(&game->background, renderer) != 0) {
         fprintf(stderr, "error: game: background rendering failed\n");
         return 1;
     }

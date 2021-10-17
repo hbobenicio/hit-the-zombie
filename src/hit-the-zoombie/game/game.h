@@ -4,16 +4,19 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_mixer.h>
 
+#include "background.h"
 #include "zoombie.h"
 #include "score.h"
 #include "fps_timer.h"
 
 struct game {
+    struct background background;
+    struct score score;
+
+    // arraylist os zoombies.
     // arrlen(zoombies) should always be equal to arrlen(respawn_timers)
     struct zoombie* zoombies;
     uint32_t* respawn_timers;
-
-    struct score score;
 
 #ifdef DEBUG_SHOW_FPS
     struct fps_timer fps_timer;

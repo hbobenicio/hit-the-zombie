@@ -3,6 +3,12 @@
 
 #include <SDL2/SDL_render.h>
 
-int background_render(SDL_Renderer* renderer);
+struct background {
+    SDL_Surface* sprite;
+};
+
+int background_init(struct background* bg);
+void background_free(struct background* bg);
+int background_render(const struct background* bg, SDL_Renderer* renderer);
 
 #endif
