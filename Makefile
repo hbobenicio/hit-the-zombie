@@ -19,8 +19,8 @@ LDLIBS  = $(PKG_LDLIBS)
 
 all: debug
 
-release: CFLAGS  += -O3
-release: LDFLAGS += -O3
+release: CFLAGS  += -O3 -march=native
+release: LDFLAGS += -O3 -march=native
 release: $(BIN)
 	strip $(BIN)
 
