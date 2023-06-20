@@ -1,3 +1,9 @@
+# Explicitly defining a default general compiler here because
+# then it defaults to using `cc` which is a symbolic link (with probably multiple indirections)
+# to the actual compiler. This is fine for the project to compile but makes it harder
+# to identify the compiler in this Makefile so we could customize specific flags to it.
+CC = gcc
+
 SRC = \
 	$(wildcard src/hit-the-zoombie/util/*.c) \
 	$(wildcard src/hit-the-zoombie/game/*.c) \
@@ -25,13 +31,13 @@ release: $(BIN)
 	strip $(BIN)
 
 ifeq ($(CC),clang)
-debug: CFLAGS  += -fsanitize=address
-debug: LDFLAGS += -fsanitize=address
+debug: CFLAGS  += -fsanitize=address,undefined -fno-omit-frame-pointer
+debug: LDFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 endif
 
 ifeq ($(CC),gcc)
-debug: CFLAGS  += -fsanitize=address
-debug: LDFLAGS += -fsanitize=address
+debug: CFLAGS  += -fsanitize=address,undefined -fno-omit-frame-pointer
+debug: LDFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 endif
 
 debug: CFLAGS  += -g -O0 -DDEBUG
