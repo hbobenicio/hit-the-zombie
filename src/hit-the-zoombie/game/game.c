@@ -11,7 +11,7 @@
 #include "score.h"
 
 #define MAX_ZOOMBIES 30
-#define JETBRAINS_MONO_REGULAR_TTF_FILE_PATH "/home/hugo/.local/share/fonts/JetBrainsMono-Regular.ttf"
+#define JETBRAINS_MONO_REGULAR_TTF_FILE_PATH "./assets/fonts/UbuntuMono-R.ttf"
 
 int game_init(struct game* game)
 {
