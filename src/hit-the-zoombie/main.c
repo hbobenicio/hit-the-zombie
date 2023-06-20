@@ -14,6 +14,7 @@
 #define STB_DS_IMPLEMENTATION
 #include <stb_ds.h>
 
+#include "game/settings.h"
 #include "game/game.h"
 #include "game/screen.h"
 
@@ -21,6 +22,9 @@
 
 int main() {
     srand(time(NULL));
+
+    struct game_settings game_settings;
+    game_settings_init_from_envvars(&game_settings);
 
     // Maybe all of these initialization calls could be encapsulated in the game init function...
     // or at least in another function.
@@ -46,13 +50,20 @@ int main() {
             goto err_ttf_quit;
         }
     }
+
+    Uint32 window_flags = 0;
+    if (game_settings.display_fullscreen) {
+        window_flags |= SDL_WINDOW_FULLSCREEN;
+    } else {
+        window_flags |= SDL_WINDOW_SHOWN;
+    }
+
     SDL_Window* window = SDL_CreateWindow(
         "Hit The Zoombie!",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
-        // SDL_WINDOW_SHOWN
-        SDL_WINDOW_FULLSCREEN
+        window_flags
     );
     if (window == NULL) {
         fprintf(stderr, "error: sdl2: failed to create window: %s\n", SDL_GetError());
@@ -66,7 +77,7 @@ int main() {
     }
 
     struct game game = {0};
-    if (game_init(&game) != 0) {
+    if (game_init(&game, &game_settings) != 0) {
         fprintf(stderr, "error: failed to init game\n");
         goto err_sdl_destroy_renderer;
     }

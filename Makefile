@@ -34,7 +34,7 @@ debug: CFLAGS  += -fsanitize=address
 debug: LDFLAGS += -fsanitize=address
 endif
 
-debug: CFLAGS  += -g -O0 -DDEBUG -DDEBUG_SHOW_FPS
+debug: CFLAGS  += -g -O0 -DDEBUG
 debug: LDFLAGS += -g -O0
 debug: $(BIN)
 
