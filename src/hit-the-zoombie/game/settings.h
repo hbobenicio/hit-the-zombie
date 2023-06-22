@@ -13,10 +13,22 @@ struct game_settings {
     bool display_fullscreen;
     /**
      * Indicates whether the display should render the FPS label or not.
-    */
+     */
     bool display_fps;
+    /**
+     * Indicates whether to render bounding boxes for debugging purposes.
+     */
+    bool bounding_box_show;
 };
 
-void game_settings_init_from_envvars(struct game_settings* gs);
+/**
+ * Returns a pointer to the global settings.
+ */
+const struct game_settings* game_settings_get(void);
+
+/**
+ * Initializes the global game settings from environment variable definitions.
+ */
+void game_settings_init_from_envvars(void);
 
 #endif

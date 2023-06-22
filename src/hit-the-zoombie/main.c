@@ -18,13 +18,13 @@
 #include "game/game.h"
 #include "game/screen.h"
 
-#define FRAME_RATE 60 //fps
+#define FRAME_RATE 1 //fps
 
 int main() {
     srand(time(NULL));
 
-    struct game_settings game_settings;
-    game_settings_init_from_envvars(&game_settings);
+    game_settings_init_from_envvars();
+    const struct game_settings* settings = game_settings_get();
 
     // Maybe all of these initialization calls could be encapsulated in the game init function...
     // or at least in another function.
@@ -52,7 +52,7 @@ int main() {
     }
 
     Uint32 window_flags = 0;
-    if (game_settings.display_fullscreen) {
+    if (settings->display_fullscreen) {
         window_flags |= SDL_WINDOW_FULLSCREEN;
     } else {
         window_flags |= SDL_WINDOW_SHOWN;
@@ -77,7 +77,7 @@ int main() {
     }
 
     struct game game = {0};
-    if (game_init(&game, &game_settings) != 0) {
+    if (game_init(&game) != 0) {
         fprintf(stderr, "error: failed to init game\n");
         goto err_sdl_destroy_renderer;
     }

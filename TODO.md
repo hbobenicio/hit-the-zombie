@@ -7,3 +7,5 @@
 - [X] Max zoombies limit
 - [ ] Fixme: Prevent multiple sound effects error
 - [ ] Background texture
+- [ ] Fixme: Zombie left-to-right orientation death animation
+- [ ] Fixme: Zombie sprite animation is not smooth

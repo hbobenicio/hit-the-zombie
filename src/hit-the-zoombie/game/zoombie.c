@@ -9,6 +9,7 @@
 #include <SDL2/SDL_image.h>
 
 #include <hit-the-zoombie/util/random.h>
+#include "settings.h"
 #include "screen.h"
 
 #define MALE_DEAD_SPRITE_FMT     "./assets/zombiefiles/png/male/Dead (%d).png"
@@ -271,6 +272,8 @@ int zoombie_init(struct zoombie* zoombie)
 
 int zoombie_render(struct zoombie* zoombie, SDL_Renderer* renderer)
 {
+    const struct game_settings* settings = game_settings_get();
+
     struct zoombie_sprites* sprites = zoombie_sprites(zoombie);
 
     SDL_Texture* texture = NULL;
@@ -313,10 +316,10 @@ int zoombie_render(struct zoombie* zoombie, SDL_Renderer* renderer)
         }
     }
 
-#ifdef DEBUG_BOUNDING_BOX
-    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &zoombie->box);
-#endif
+    if (settings->bounding_box_show) {
+        SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
+        SDL_RenderDrawRect(renderer, &zoombie->box);
+    }
 
     SDL_DestroyTexture(texture);
     return 0;
@@ -340,7 +343,7 @@ void zoombie_set_state(struct zoombie* zoombie, enum zoombie_state new_state)
 
 void zoombie_update(struct zoombie* zoombie)
 {
-    // if the zoombie is dead then there is nothing to update
+    // if the zoombie is dead then there is nothing to update.
     if (zoombie->state == ZOOMBIE_STATE_DEAD) {
         return;
     }
@@ -350,14 +353,18 @@ void zoombie_update(struct zoombie* zoombie)
         zoombie->animation_sprite_index = (zoombie->animation_sprite_index + 1) % zoombie_sprite_animation_len(zoombie);
         zoombie->animation_tick = SDL_GetTicks();
 
-        zoombie->box.x += zoombie->velocity;
-        if (zoombie_collide_screen(zoombie)) {
-            zoombie->box.x -= zoombie->velocity;
-            if (zoombie->direction == ZOOMBIE_DIRECTION_RIGHT)
-                zoombie->direction = ZOOMBIE_DIRECTION_LEFT;
-            else
-                zoombie->direction = ZOOMBIE_DIRECTION_RIGHT;
-            zoombie->velocity = -zoombie->velocity;
+        // A dying zombie just animates... it doesn't move though.
+        if (zoombie->state != ZOOMBIE_STATE_DYING) {
+            zoombie->box.x += zoombie->velocity;
+            if (zoombie_collide_screen(zoombie)) {
+                zoombie->box.x -= zoombie->velocity;
+                if (zoombie->direction == ZOOMBIE_DIRECTION_RIGHT) {
+                    zoombie->direction = ZOOMBIE_DIRECTION_LEFT;
+                } else {
+                    zoombie->direction = ZOOMBIE_DIRECTION_RIGHT;
+                }
+                zoombie->velocity = -zoombie->velocity;
+            }
         }
 
         if (zoombie->state == ZOOMBIE_STATE_DYING && zoombie->animation_sprite_index == 0) {

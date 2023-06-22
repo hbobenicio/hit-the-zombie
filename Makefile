@@ -59,11 +59,12 @@ $(BIN): $(OBJ)
 run: $(BIN)
 	./$(BIN)
 
+# FIXME: Not working atm (we need to install assets too). Probably better to package it into a deb file first
 install:
 	install $(BIN) $(HOME)/bin/
 
 distclean: clean
-	rm -f $(BIN)
+	$(RM) -f $(BIN)
 
 clean:
 	find . \

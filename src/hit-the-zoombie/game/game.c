@@ -14,9 +14,9 @@
 #define MAX_ZOOMBIES 30
 #define JETBRAINS_MONO_REGULAR_TTF_FILE_PATH "./assets/fonts/UbuntuMono-R.ttf"
 
-int game_init(struct game* game, const struct game_settings* settings)
+int game_init(struct game* game)
 {
-    game->settings = settings;
+    const struct game_settings* settings = game_settings_get();
 
     if (zoombie_init_sprites() != 0) {
         fprintf(stderr, "error: game: failed to init zoombie sprites\n");
@@ -28,7 +28,7 @@ int game_init(struct game* game, const struct game_settings* settings)
         goto err_zoombie_free_sprites;
     }
 
-    game->jetbrains_mono_regular_font = TTF_OpenFont(JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, 24);
+    game->jetbrains_mono_regular_font = TTF_OpenFont(JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, 22);
     if (game->jetbrains_mono_regular_font == NULL) {
         fprintf(stderr, "error: game: failed to init font '%s': %s", JETBRAINS_MONO_REGULAR_TTF_FILE_PATH, TTF_GetError());
         goto err_background_free;
@@ -53,7 +53,7 @@ int game_init(struct game* game, const struct game_settings* settings)
 
     score_init(&game->score, game->jetbrains_mono_regular_font);
 
-    if (game->settings->display_fps) {
+    if (settings->display_fps) {
         fps_timer_init(&game->fps_timer, game->jetbrains_mono_regular_font);
     }
 
@@ -92,6 +92,8 @@ void game_free(struct game* game)
 
 int game_render(struct game* game, SDL_Renderer* renderer)
 {
+    const struct game_settings* settings = game_settings_get();
+
     if (background_render(&game->background, renderer) != 0) {
         fprintf(stderr, "error: game: background rendering failed\n");
         return 1;
@@ -110,7 +112,7 @@ int game_render(struct game* game, SDL_Renderer* renderer)
         return 1;
     }
 
-    if (game->settings->display_fps) {
+    if (settings->display_fps) {
         if (fps_timer_render(&game->fps_timer, renderer) != 0) {
             fprintf(stderr, "error: game: fps timer rendering failed\n");
         }
@@ -121,7 +123,9 @@ int game_render(struct game* game, SDL_Renderer* renderer)
 
 void game_update(struct game* game)
 {
-    if (game->settings->display_fps) {
+    const struct game_settings* settings = game_settings_get();
+
+    if (settings->display_fps) {
         fps_timer_update(&game->fps_timer);
     }
 

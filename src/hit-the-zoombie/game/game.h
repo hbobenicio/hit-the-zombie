@@ -9,10 +9,7 @@
 #include "score.h"
 #include "fps_timer.h"
 
-struct game_settings;
-
 struct game {
-    const struct game_settings* settings;
     struct background background;
     struct score score;
 
@@ -27,7 +24,7 @@ struct game {
     Mix_Chunk* hit_snd;
 };
 
-int game_init(struct game* game, const struct game_settings* settings);
+int game_init(struct game* game);
 void game_free(struct game* game);
 int game_render(struct game* game, SDL_Renderer* renderer);
 void game_update(struct game* game);
