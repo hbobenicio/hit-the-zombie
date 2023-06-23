@@ -18,8 +18,6 @@
 #include "game/game.h"
 #include "game/screen.h"
 
-#define FRAME_RATE 1 //fps
-
 int main() {
     srand(time(NULL));
 
@@ -82,7 +80,7 @@ int main() {
         goto err_sdl_destroy_renderer;
     }
 
-    const uint32_t expected_frame_duration_ms = 1000 / FRAME_RATE;
+    const uint32_t expected_frame_duration_ms = 1000 / settings->frame_rate;
     while (true) {
         uint32_t frame_start_ms = SDL_GetTicks();
         {

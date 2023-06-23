@@ -1,6 +1,7 @@
 #ifndef HTZ_GAME_SETTINGS_H
 #define HTZ_GAME_SETTINGS_H
 
+#include <stddef.h>
 #include <stdbool.h>
 
 /**
@@ -19,6 +20,10 @@ struct game_settings {
      * Indicates whether to render bounding boxes for debugging purposes.
      */
     bool bounding_box_show;
+    /**
+     * Indicates the desired animation frame rate
+     */
+    size_t frame_rate;
 };
 
 /**
