@@ -151,10 +151,14 @@ void game_update(struct game* game)
 
                 game->respawn_timers[i] = SDL_GetTicks();
 
-                // TODO how to prevent sound errors zoombies dies too fast? prevent playing this over and over...
+                if (Mix_HaltChannel(-1) != 0) {
+                    fprintf(stderr, "error: game: failed to halt hit sound effects: %s\n", Mix_GetError());
+                }
+
                 if (Mix_PlayChannel(-1, game->hit_snd, 0) != 0) {
                     fprintf(stderr, "error: game: failed to play hit sound effects: %s\n", Mix_GetError());
                 }
+
                 score_inc(&game->score);
 
                 // We just wanna check 1 hit per update, right?

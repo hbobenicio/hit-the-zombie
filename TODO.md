@@ -5,7 +5,7 @@
 - [X] Fixme: Respawn timer must be unique for each zoombie
 - [X] Zoombie collision detection must consider only the top one (lower zoombie index)
 - [X] Max zoombies limit
-- [ ] Fixme: Prevent multiple sound effects error
+- [X] Fixme: Prevent multiple sound effects error
 - [ ] Background texture
 - [ ] Fixme: Zombie left-to-right orientation death animation
 - [ ] Fixme: Zombie sprite animation is not smooth
